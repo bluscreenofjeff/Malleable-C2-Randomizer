@@ -1,0 +1,8 @@
+#x86			x64
+#use tab separation between the x86 and x64 process names
+#
+%windir%\\syswow64\\eventvwr.exe	%windir%\\sysnative\\eventvwr.exe
+%windir%\\syswow64\\taskeng.exe	%windir%\\sysnative\\taskeng.exe
+%windir%\\syswow64\\spoolsv.exe	%windir%\\sysnative\\spoolsv.exe
+%windir%\\syswow64\\dllhost.exe	%windir%\\sysnative\\dllhost.exe
+%windir%\\syswow64\\gpupdate.exe	%windir%\\sysnative\\gpupdate.exe
