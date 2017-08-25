@@ -1,9 +1,9 @@
 # Malleable-C2-Randomizer
-This script randomizes Cobalt Strike Malleable C2 profiles through the use of a metalanguage, hopefully reducing the chances of flagging signature-based detection controls. In short, the script parses the provided template, substitutes the variables for a random value from either a provided or built-in wordlist, tests the new template with *c2lint*, and (if there are no *c2lint* errors) outputs the new Malleable C2 file.
+This script randomizes Cobalt Strike Malleable C2 profiles through the use of a metalanguage, hopefully reducing the chances of flagging signature-based detection controls. In short, the script parses the provided template, substitutes the variables for a random value from either a provided or built-in wordlist, tests the new template with *c2lint*, and (if there are no *c2lint* errors) outputs the new Malleable C2 profile.
 
-Sample Malleable C2 profiles that are compatible with this script can be found in the [Sample Templates](LINK-HERE) directory of this repo.
+Sample Malleable C2 profiles that are compatible with this script can be found in the [Sample Templates](https://github.com/bluscreenofjeff/Malleable-C2-Randomizer/tree/master/Sample%20Lists) directory of this repo.
 
-For more detailed information about the script's usage and how to implement the metalanguage in an existing Malleable C2 profile, check out my blog post [BLAHBLAHBLAH](LINK-HERE).
+For more about this script, check out my blog post [Randomized Malleable C2 Profiles Made Easy](LINK-HERE).
 
 # Table of Contents
 - [Script Syntax](#script-syntax)
@@ -42,7 +42,7 @@ python malleable-c2-randomizer.py [-h] -profile PROFILE
 | -notest, -n | Skip testing with c2lint (Flag) |
 
 ## Custom Wordlists
-If no wordlist is provided, a built-in list will be used by default. For more information about creating these lists, see [below](#building-wordlists) or the [sample wordlists](LINK-HERE) folder in this repo.
+If no wordlist is provided, a built-in list will be used by default. For more information about creating these lists, see [below](#building-wordlists) or the [Sample Wordlists](https://github.com/bluscreenofjeff/Malleable-C2-Randomizer/tree/master/Sample%20Lists) folder in this repo.
 
 | Parameter | Description |
 | ----- | ----- |
@@ -112,10 +112,120 @@ It's important to note that the `syswow64` and `sysnative` strings in the proces
 
 The final wordlist type is the custom characterset. This file should include any characters for the script to randomly substitute. For example, a charset file of `AEIOUY` and a variable of `%%custom:5%%` will output five random characters from the charset string. When building this characterset, bear in mind that some characters are prohibited from appearing in a URI and may interfere with Beacon's communications.
 
-For sample wordlists, see the [Sample Wordlists](LINK-HERE) directory in this repo.
+For sample wordlists, see the [Sample Wordlists](https://github.com/bluscreenofjeff/Malleable-C2-Randomizer/tree/master/Sample%20Lists) directory in this repo.
 
 # Example Template and Output
-EXAMPLE GOES HERE
+Here is a snippet from a modified Amazon profile:
+
+```
+# This profile has been modified to use with the Malleable C2 Profile Randomizer
+
+#
+# Amazon browsing traffic profile
+# 
+# Author: @harmj0y
+#
+
+set sleeptime "%%number:2%%00";
+set jitter    "1%%number%%";
+set maxdns    "24%%number%%";
+set useragent "%%useragent%%";
+
+http-get {
+
+    set uri "/s/ref=nb_sb_noss_1/%%number:3%%-%%number:8%%-%%number:7%%/field-keywords=%%word%%";
+
+    client {
+
+        header "Accept" "*/*";
+        header "Host" "www.amazon.com";
+
+        metadata {
+            base64;
+            prepend "session-token=";
+            prepend "skin=noskin;";
+            append "csm-hit=s-%%alphanumeric:20%%|%%number:13%%";
+            header "Cookie";
+        }
+    }
+}
+```
+
+And here is two sets of output from the same profile:
+
+```
+# This profile has been modified to use with the Malleable C2 Profile Randomizer
+
+#
+# Amazon browsing traffic profile
+# 
+# Author: @harmj0y
+#
+
+set sleeptime "5600";
+set jitter    "19";
+set maxdns    "244";
+set useragent "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1";
+
+http-get {
+
+    set uri "/s/ref=nb_sb_noss_1/818-61846941-6716865/field-keywords=number";
+
+    client {
+
+        header "Accept" "*/*";
+        header "Host" "www.amazon.com";
+
+        metadata {
+            base64;
+            prepend "session-token=";
+            prepend "skin=noskin;";
+            append "csm-hit=s-UXnlEVYWc36qEuDMFPzW|2872195700726";
+            header "Cookie";
+        }
+    }
+}
+```
+
+
+```
+# This profile has been modified to use with the Malleable C2 Profile Randomizer
+
+#
+# Amazon browsing traffic profile
+# 
+# Author: @harmj0y
+#
+
+set sleeptime "7400";
+set jitter    "19";
+set maxdns    "246";
+set useragent "Mozilla/5.0 (Windows NT 10.0; WOW64)";
+
+http-get {
+
+    set uri "/s/ref=nb_sb_noss_1/684-10075672-1686806/field-keywords=year";
+
+    client {
+
+        header "Accept" "*/*";
+        header "Host" "www.amazon.com";
+
+        metadata {
+            base64;
+            prepend "session-token=";
+            prepend "skin=noskin;";
+            append "csm-hit=s-ub5oBmGd0pnDoImCjDyK|2539750656854";
+            header "Cookie";
+        }
+    }
+}
+```
 
 # Further Resources
-malleable stuff goes here
+* [Malleable Command and Control Documentation - Raphael Mudge](https://www.cobaltstrike.com/help-malleable-c2)
+* [Malleable C2 Profiles - GitHub](https://github.com/rsmudge/Malleable-C2-Profiles)
+* [How to Write Malleable C2 Profiles for Cobalt Strike - Jeff Dimmock](https://bluescreenofjeff.com/2017-01-24-how-to-write-malleable-c2-profiles-for-cobalt-strike/)
+* [Cobalt Strike 2.0 - Malleable Command and Control - Raphael Mudge](http://blog.cobaltstrike.com/2014/07/16/malleable-command-and-control/)
+* [Cobalt Strike 3.6 - A Path for Privilege Escalation - Raphael Mudge](http://blog.cobaltstrike.com/2016/12/08/cobalt-strike-3-6-a-path-for-privilege-escalation/)
+* [A Brave New World: Malleable C2 - Will Schroeder](http://www.harmj0y.net/blog/redteaming/a-brave-new-world-malleable-c2/)
