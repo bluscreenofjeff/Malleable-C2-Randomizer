@@ -1,7 +1,7 @@
 # Malleable-C2-Randomizer
 This script randomizes Cobalt Strike Malleable C2 profiles through the use of a metalanguage, hopefully reducing the chances of flagging signature-based detection controls. In short, the script parses the provided template, substitutes the variables for a random value from either a provided or built-in wordlist, tests the new template with *c2lint*, and (if there are no *c2lint* errors) outputs the new Malleable C2 profile.
 
-Sample Malleable C2 profiles that are compatible with this script can be found in the [Sample Templates](https://github.com/bluscreenofjeff/Malleable-C2-Randomizer/tree/master/Sample%20Lists) directory of this repo.
+Sample Malleable C2 profiles that are compatible with this script can be found in the [Sample Templates](https://github.com/bluscreenofjeff/Malleable-C2-Randomizer/tree/master/Sample%20Templates) directory of this repo.
 
 For more about this script, check out my blog post [Randomized Malleable C2 Profiles Made Easy](LINK-HERE).
 
