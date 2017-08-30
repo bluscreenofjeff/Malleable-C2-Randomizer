@@ -3,7 +3,7 @@ This script randomizes Cobalt Strike Malleable C2 profiles through the use of a 
 
 Sample Malleable C2 profiles that are compatible with this script can be found in the [Sample Templates](https://github.com/bluscreenofjeff/Malleable-C2-Randomizer/tree/master/Sample%20Templates) directory of this repo.
 
-For more about this script, check out my blog post [Randomized Malleable C2 Profiles Made Easy](LINK-HERE).
+For more about this script, check out my blog post [Randomized Malleable C2 Profiles Made Easy](https://bluescreenofjeff.com/2017-08-30-randomized-malleable-c2-profiles-made-easy/).
 
 # Table of Contents
 - [Script Syntax](#script-syntax)
