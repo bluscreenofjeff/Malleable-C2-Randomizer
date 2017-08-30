@@ -57,7 +57,7 @@ If no wordlist is provided, a built-in list will be used by default. For more in
 Most of these wordlist variables are directly related to Malleable C2 options. For more information about what these profile options do, check out the [official documentation](https://www.cobaltstrike.com/help-malleable-c2).
 
 # Substitution Metalanguage
-The substitution metalanguage comprises specific variables, some of which allow optional repitition counts, wrapped in double percentage signs, like so:
+The substitution metalanguage comprises specific variables, some of which allow optional repetition counts, wrapped in double percentage signs, like so:
 
 ```
 %%variable:count%%
