@@ -13,7 +13,7 @@ set useragent "Shockwave Flash";
 
 http-get {
 
-    set uri "/idle/%%mnumber:10%%/1";
+    set uri "/idle/%%number:10%%/1";
 
     client {
 
