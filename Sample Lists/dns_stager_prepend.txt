@@ -1,0 +1,4 @@
+v=spf1 a:mail.google.com -all
+google-site-verification=
+microsoft-site-verification=
+amazon-site-verification=

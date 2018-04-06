@@ -30,6 +30,9 @@ randomize_settings['pipename_stager'] = ['browser_##','comnode_##','spoolss_##',
 #dns_stager_subhost
 randomize_settings['dns_stager_subhost'] = ['.m.123456.','.ftp.123456.','.imap.123456.','.pop.123456.','.smtp.123456.','.mail.123456.','.webmail.123456.','.blog.123456.','.wiki.123456.','.support.123456.','.kb.123456.','.help.123456.','.go.123456.','.static.123456.','.api.123456.','.dev.123456.','.events.123456.','.feeds.123456.','.forums.123456.','.groups.123456.','.img.123456.','.media.123456.','.news.123456.','.sites.123456.','.admin.123456.','.mysql.123456.','.store.123456.','.vpn.123456.','.admin.123456.','.beta.123456.','.photos.123456.','.files.123456.','.resources.123456.','.secure.123456.','.ssl.123456.','.apps.123456.','.pic.123456.','.status.123456.','.mobile.123456.','.search.123456.','.live.123456.','.videos.123456.','.lists.123456.']
 
+#dns_stager_prepend
+randomize_settings['dns_stager_prepend'] = ['v=spf1 a:mail.google.com -all','google-site-verification=','microsoft-site-verification=','amazon-site-verification=']
+
 #wordlist
 randomize_settings['wordlist'] = ['time','person','year','way','day','thing','man','world','life','hand','part','child','eye','woman','place','work','week','case','point','government','company','number','group','problem','fact']
 
@@ -57,6 +60,10 @@ def chargen(charset,number):
 		return ''.join(random.choice(string.ascii_uppercase) for _ in range(number))
 	elif charset == 'alphalower':
 		return ''.join(random.choice(string.ascii_lowercase) for _ in range(number))
+	elif charset == 'alphauppernumber':
+		return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(number))
+	elif charset == 'alphalowernumber':
+		return ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(number))
 	elif charset == 'number':
 		return ''.join(random.choice(string.digits) for _ in range(number))
 	elif charset == 'hex':
@@ -67,6 +74,8 @@ def chargen(charset,number):
 		return ''.join(random.choice(randomize_settings['customcharset']) for _ in range(number))
 	elif charset == 'word':
 		return ''.join(random.choice(randomize_settings['wordlist']) for _ in range(number))	
+	elif charset == 'boolean':
+		return ''.join(random.choice(['True', 'False']) for _ in range(number))	
 	else:
 		pass
 
@@ -83,14 +92,14 @@ def processprofile(profile):
 	spawnto_x64 = randomize_settings['spawnto'][spawnto_x86]
 
 	for line in profilecontent:
-		m = re.findall('%%(alphanumeric|alphanumspecial|alphanumspecialurl|alphaupper|alphalower|alpha|number|hex|netbios|customchar|useragent|spawnto_x86|spawnto_x64|pipename|pipename_stager|dns_stager_subhost|word)\:?(\d*)%%', line)
+		m = re.findall('%%(alphanumeric|alphanumspecial|alphanumspecialurl|alphaupper|alphalower|alphauppernumber|alphalowernumber|alpha|number|hex|netbios|customchar|useragent|spawnto_x86|spawnto_x64|pipename|pipename_stager|dns_stager_subhost|dns_stager_prepend|word|boolean)\:?(\d*)%%', line)
 		if m:
 			for eachmatch in m:
 				replacetype = eachmatch[0]
 				replacevalue = eachmatch[1]
 
 				#characters
-				if replacetype in ['alphanumeric','alphanumspecial','alphanumspecialurl','alphaupper','alphalower','alpha','number','hex','netbios','customchar','word']:
+				if replacetype in ['alphanumeric','alphanumspecial','alphanumspecialurl','alphaupper','alphalower','alphauppernumber','alphalowernumber','alpha','number','hex','netbios','customchar','word','boolean']:
 					if replacetype == 'customchar' and randomize_settings['customcharset'] == '':
 						print '[!] Error - "customchar" variable called with no customchar file specified:'
 						print '	' + line
@@ -118,6 +127,8 @@ def processprofile(profile):
 				elif replacetype == 'dns_stager_subhost':
 					line = line.replace('%%dns_stager_subhost%%',random.choice(randomize_settings['dns_stager_subhost']),1)
 				
+				elif replacetype == 'dns_stager_prepend':
+					line = line.replace('%%dns_stager_prepend%%',random.choice(randomize_settings['dns_stager_prepend']),1)				
 
 		filewrite(line + '\n',randomize_settings['tempfilename'],'a')
 
@@ -166,9 +177,10 @@ if __name__ == '__main__':
 	parser.add_argument('-wordlist', help='File with a list of custom words to use with the %%word%% variable {Default = Built-in list}')
 	parser.add_argument('-useragent', help='File with a list of useragents {Default = Built-in list}')
 	parser.add_argument('-spawnto', help='File with a list of custom spawnto processes {Default = Built-in list}')
-	parser.add_argument('-pipename', help='File with a list of custome pipenames {Default = Built-in list}')
-	parser.add_argument('-pipename_stager', help='File with a list of custom pipename_stagers {Default = Built-in list}')
-	parser.add_argument('-dns_stager_subhost', help='File with a list of custom dns_stager_subhosts {Default = Built-in list}')
+	parser.add_argument('-pipename', help='File with a list of custom pipename values {Default = Built-in list}')
+	parser.add_argument('-pipename_stager', help='File with a list of custom pipename_stager values {Default = Built-in list}')
+	parser.add_argument('-dns_stager_subhost', help='File with a list of custom dns_stager_subhost values {Default = Built-in list}')
+	parser.add_argument('-dns_stager_prepend', help='File with a list of custom dns_stager_prepend values {Default = Built-in list}')
 	
 	args = parser.parse_args()
 	
@@ -264,7 +276,13 @@ if __name__ == '__main__':
 				randomize_settings['dns_stager_subhost'] = list(set(dnsstagerfile.read().splitlines()))
 		else:
 			parser.error('the custom dns_stager_subhost list file specified does not exist')
-
+	
+	if args.dns_stager_prepend:
+		if os.path.isfile(args.dns_stager_prepend):
+			with open(args.dns_stager_prepend) as dnsprependfile:
+				randomize_settings['dns_stager_prepend'] = list(set(dnsprependfile.read().splitlines()))
+		else:
+			parser.error('the custom dns_stager_prepend list file specified does not exist')
 
 	for iter in range(int(randomize_settings['count'])):
 		iter += 1

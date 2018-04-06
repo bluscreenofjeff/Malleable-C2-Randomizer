@@ -78,18 +78,22 @@ As another example, the following variable will result in 20 alphanumeric charac
 | alphanumspecialurl | Outputs a random mixed-case ascii letter, digit, or one of the following characters: `-._~` | Yes |
 | alphaupper | Outputs a random uppercase ascii letter | Yes |
 | alphalower | Outputs a random lowercase ascii letter | Yes |
+| alphauppernumber | Outputs a random uppercase ascii letter or digit | Yes |
+| alphalowernumber | Outputs a random lowercase ascii letter or digit | Yes |
 | alpha | Outputs a random ascii letter | Yes |
 | number | Outputs a random digit | Yes |
 | hex | Outputs a random hexadecimal digit | Yes |
 | netbios | Outputs a random mixed-case ascii letter, digit, or one of the following characters: `!@#$%^&)(.-'_{}~` | Yes |
 | custom | Maps to a random character in the provided *charset* file | Yes |
 | word | Outputs a random word from the provided or built-in wordlist | Yes |
+| boolean | Outputs a 'True' or 'False' | Yes |
 | useragent | Outputs a random useragent from the provided or built-in list | No |
 | spawnto_x86 | Outputs a random x86 process path from the provided or built-in list | No |
 | spawnto_x64 | Outputs a random x64 process path from the provided or built-in list | No |
 | pipename | Outputs a random pipename from the provided or built-in list | No |
 | pipename_stager | Outputs a random pipename_stager from the provided or built-in list | No |
 | dns_stager_subhost | Outputs a random dns_stager_subhost from the provided or built-in list | No |
+| dns_stager_prepend | Outputs a random dns_stager_prepend from the provided or built-in list | No |
 
 ## Building Wordlists
 Wordlist files are simply line-separated, tab-separated, or continuous strings (depending on the wordlist type) place in a text file.
@@ -101,6 +105,7 @@ The following wordlists should be line-separated with each entry on a new line:
 * pipename
 * pipename_stager
 * dns_stager_subhost
+* dns_stager_prepend
 
 The spawnto wordlist is a bit more complicated. Malleable C2 requires an x86 and x64 option to modify all process spawning. Therefore, each line of the wordlist should contain both the x86 and x64 process paths separated by a tab, with the x86 process listed first. For example:
 
@@ -223,6 +228,7 @@ http-get {
 ```
 
 # Further Resources
+* [Randomized Malleable C2 Profiles Made Easy - Jeff Dimmock](https://bluescreenofjeff.com/2017-08-30-randomized-malleable-c2-profiles-made-easy/)
 * [Malleable Command and Control Documentation - Raphael Mudge](https://www.cobaltstrike.com/help-malleable-c2)
 * [Malleable C2 Profiles - GitHub](https://github.com/rsmudge/Malleable-C2-Profiles)
 * [How to Write Malleable C2 Profiles for Cobalt Strike - Jeff Dimmock](https://bluescreenofjeff.com/2017-01-24-how-to-write-malleable-c2-profiles-for-cobalt-strike/)
