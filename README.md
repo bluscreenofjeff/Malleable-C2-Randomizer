@@ -50,9 +50,10 @@ If no wordlist is provided, a built-in list will be used by default. For more in
 | -wordlist | File with a list of custom words to use with the %%word%% variable |
 | -useragent | File with a list of useragents |
 | -spawnto | File with a list of custom spawnto processes |
-| -pipename | File with a list of custome pipenames |
-| -pipename_stager | File with a list of custom pipename_stagers |
-| -dns_stager_subhost | File with a list of custom dns_stager_subhosts |
+| -pipename | File with a list of custom pipename values |
+| -pipename_stager | File with a list of custom pipename_stager values |
+| -dns_stager_subhost | File with a list of custom dns_stager_subhost values |
+| -dns_stager_prepend | File with a list of custom dns_stager_prepend values |
 
 Most of these wordlist variables are directly related to Malleable C2 options. For more information about what these profile options do, check out the [official documentation](https://www.cobaltstrike.com/help-malleable-c2).
 
