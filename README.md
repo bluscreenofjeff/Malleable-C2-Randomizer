@@ -30,6 +30,9 @@ python malleable-c2-randomizer.py [-h] -profile PROFILE
                                   [-pipename PIPENAME]
                                   [-pipename_stager PIPENAME_STAGER]
                                   [-dns_stager_subhost DNS_STAGER_SUBHOST]
+                                  [-certificate_store CERTIFICATE_STORE]
+                                  [-certificate_store_password CERTIFICATE_STORE_PASSWORD]
+                                  [-nosslcert]
 ```
 
 ## Basic Options

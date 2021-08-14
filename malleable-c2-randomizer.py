@@ -36,11 +36,11 @@ randomize_settings['dns_stager_prepend'] = ['v=spf1 a:mail.google.com -all','goo
 #wordlist
 randomize_settings['wordlist'] = ['time','person','year','way','day','thing','man','world','life','hand','part','child','eye','woman','place','work','week','case','point','government','company','number','group','problem','fact']
 
-
 #Setting Defaults
 randomize_settings['count'] = 1
 randomize_settings['cobalt'] = os.getcwd()
 randomize_settings['notest'] = False
+randomize_settings['nosslcert'] = False
 randomize_settings['launchdir'] = os.getcwd()
 
 #process detail counts
@@ -80,7 +80,7 @@ def chargen(charset,number):
 		pass
 
 #PROCESS FUNCTION
-def processprofile(profile):
+def processprofile(profile,certificate_store,certificate_store_password):
 	randomize_settings['tempfilename'] = randomize_settings['output'] + '__' + chargen('alphanumeric',8) + '.profile.tmp'			
 
 	filewrite('',randomize_settings['tempfilename'],'w')
@@ -128,9 +128,20 @@ def processprofile(profile):
 					line = line.replace('%%dns_stager_subhost%%',random.choice(randomize_settings['dns_stager_subhost']),1)
 				
 				elif replacetype == 'dns_stager_prepend':
-					line = line.replace('%%dns_stager_prepend%%',random.choice(randomize_settings['dns_stager_prepend']),1)				
+					line = line.replace('%%dns_stager_prepend%%',random.choice(randomize_settings['dns_stager_prepend']),1)	
+
 
 		filewrite(line + '\n',randomize_settings['tempfilename'],'a')
+
+	if not randomize_settings['nosslcert']:
+		# Appending SSL Cert at bottom
+		filewrite('https-certificate {' + '\n',randomize_settings['tempfilename'],'a')
+		filewrite('set CN       "Test";' + '\n',randomize_settings['tempfilename'],'a')
+		filewrite('set O        "Test";' + '\n',randomize_settings['tempfilename'],'a')
+		filewrite('set keystore \"{}\";'.format(certificate_store) + '\n',randomize_settings['tempfilename'],'a')
+		filewrite('set password \"{}\";'.format(certificate_store_password)+ '\n',randomize_settings['tempfilename'],'a')
+		filewrite('}' + '\n',randomize_settings['tempfilename'],'a')
+
 
 	#c2lint testing
 	if randomize_settings['notest']:
@@ -138,6 +149,7 @@ def processprofile(profile):
 		print '[+] Profile written to: ' + randomize_settings['tempfilename'].replace('.tmp','',-1)
 	elif c2lint():
 		os.system('mv ' + randomize_settings['tempfilename'] + ' ' + randomize_settings['tempfilename'].replace('.tmp','',-1))
+		print '[+] No errors in c2lint test but there might be bad opsec warnings. Make sure to run manually one more time before launching CobaltStrike'
 		print '[+] Profile written to: ' + randomize_settings['tempfilename'].replace('.tmp','',-1)
 
 def c2lint():
@@ -172,7 +184,6 @@ if __name__ == '__main__':
 	parser.add_argument('-cobalt','-d',  help='The directory where Cobalt Strike is located (for c2lint) {Default = current directory}')
 	parser.add_argument('-output','-o', help='Output base name {Default = template basename and random string}')
 	parser.add_argument('-notest','-n', help='Skip testing with c2lint', action='store_true')
-
 	parser.add_argument('-charset', help='File with a custom characterset to use with the %%customchar%% variable {Default = Built-in list}')
 	parser.add_argument('-wordlist', help='File with a list of custom words to use with the %%word%% variable {Default = Built-in list}')
 	parser.add_argument('-useragent', help='File with a list of useragents {Default = Built-in list}')
@@ -181,6 +192,10 @@ if __name__ == '__main__':
 	parser.add_argument('-pipename_stager', help='File with a list of custom pipename_stager values {Default = Built-in list}')
 	parser.add_argument('-dns_stager_subhost', help='File with a list of custom dns_stager_subhost values {Default = Built-in list}')
 	parser.add_argument('-dns_stager_prepend', help='File with a list of custom dns_stager_prepend values {Default = Built-in list}')
+	parser.add_argument('-certificate_store', help='Your custom SSL Cert with .store extension. Specify absolute path')
+	parser.add_argument('-certificate_store_password', help='Your custom SSL Cert password')
+	parser.add_argument('-nosslcert', help='Skip SSL Cert', action='store_true')
+
 	
 	args = parser.parse_args()
 	
@@ -284,8 +299,24 @@ if __name__ == '__main__':
 		else:
 			parser.error('the custom dns_stager_prepend list file specified does not exist')
 
+	if args.nosslcert:
+		randomize_settings['nosslcert'] = True
+	
+	if not args.nosslcert:
+		if args.certificate_store:
+			if args.certificate_store_password:
+				if os.path.isfile(args.certificate_store):
+					randomize_settings['certificate_store'] = str(args.certificate_store)
+					randomize_settings['certificate_store_password'] = str(args.certificate_store_password)
+				else:
+					parser.error('the custom certificate store list file specified does not exist')
+			else:
+				parser.error('please specify password for your SSL (.store) certificate')
+		else:
+			parser.error("For better **OPSEC** please specify your C2 domain's SSL (.store) certificate or use '-nosslcert' flag to skip")
+
 	for iter in range(int(randomize_settings['count'])):
 		iter += 1
 		print '[*] Generating profile ' + str(iter) + ' of ' + str(randomize_settings['count'])
-		processprofile(randomize_settings['profile'])
+		processprofile(randomize_settings['profile'],args.certificate_store,args.certificate_store_password)
 	print '[+] Profile randomization complete!'
