@@ -47,245 +47,269 @@ randomize_settings['launchdir'] = os.getcwd()
 processdetails['errorcount'] = 1
 
 def chargen(charset,number):
-	number = int(number)
-	if charset == 'alphanumeric':
-		return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(number))
-	elif charset == 'alphanumspecial':
-		return ''.join(random.choice(string.ascii_letters + string.digits + string.punctuation) for _ in range(number))
-	elif charset == 'alphanumspecialurl':
-		return ''.join(random.choice(string.ascii_letters + string.digits + '-._~') for _ in range(number))
-	elif charset == 'alpha':
-		return ''.join(random.choice(string.ascii_letters) for _ in range(number))
-	elif charset == 'alphaupper':
-		return ''.join(random.choice(string.ascii_uppercase) for _ in range(number))
-	elif charset == 'alphalower':
-		return ''.join(random.choice(string.ascii_lowercase) for _ in range(number))
-	elif charset == 'alphauppernumber':
-		return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(number))
-	elif charset == 'alphalowernumber':
-		return ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(number))
-	elif charset == 'number':
-		return ''.join(random.choice(string.digits) for _ in range(number))
-	elif charset == 'hex':
-		return ''.join(random.choice(string.hexdigits) for _ in range(number))
-	elif charset == 'netbios':
-		return ''.join(random.choice(string.ascii_letters + string.digits + "!@#$%^&)(.-'_{}~") for _ in range(number))
-	elif charset == 'customchar':
-		return ''.join(random.choice(randomize_settings['customcharset']) for _ in range(number))
-	elif charset == 'word':
-		return ''.join(random.choice(randomize_settings['wordlist']) for _ in range(number))	
-	elif charset == 'boolean':
-		return ''.join(random.choice(['True', 'False']) for _ in range(number))	
-	else:
-		pass
+     number = int(number)
+     if charset == 'alphanumeric':
+          return ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(number))
+     elif charset == 'alphanumspecial':
+          return ''.join(random.choice(string.ascii_letters + string.digits + string.punctuation) for _ in range(number))
+     elif charset == 'alphanumspecialurl':
+          return ''.join(random.choice(string.ascii_letters + string.digits + '-._~') for _ in range(number))
+     elif charset == 'alpha':
+          return ''.join(random.choice(string.ascii_letters) for _ in range(number))
+     elif charset == 'alphaupper':
+          return ''.join(random.choice(string.ascii_uppercase) for _ in range(number))
+     elif charset == 'alphalower':
+          return ''.join(random.choice(string.ascii_lowercase) for _ in range(number))
+     elif charset == 'alphauppernumber':
+          return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(number))
+     elif charset == 'alphalowernumber':
+          return ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(number))
+     elif charset == 'number':
+          return ''.join(random.choice(string.digits) for _ in range(number))
+     elif charset == 'hex':
+          return ''.join(random.choice(string.hexdigits) for _ in range(number))
+     elif charset == 'netbios':
+          return ''.join(random.choice(string.ascii_letters + string.digits + "!@#$%^&)(.-'_{}~") for _ in range(number))
+     elif charset == 'customchar':
+          return ''.join(random.choice(randomize_settings['customcharset']) for _ in range(number))
+     elif charset == 'word':
+          return ''.join(random.choice(randomize_settings['wordlist']) for _ in range(number)) 
+     elif charset == 'boolean':
+          return ''.join(random.choice(['True', 'False']) for _ in range(number))    
+     else:
+          pass
 
 #PROCESS FUNCTION
-def processprofile(profile):
-	randomize_settings['tempfilename'] = randomize_settings['output'] + '__' + chargen('alphanumeric',8) + '.profile.tmp'			
+def processprofile(profile,certificate_store,certificate_store_password):
+     randomize_settings['tempfilename'] = randomize_settings['output'] + '__' + chargen('alphanumeric',8) + '.profile.tmp'             
 
-	filewrite('',randomize_settings['tempfilename'],'w')
+     filewrite('',randomize_settings['tempfilename'],'w')
 
-	with open(profile) as profilefile:
-		profilecontent = profilefile.read().splitlines()
+     with open(profile) as profilefile:
+          profilecontent = profilefile.read().splitlines()
 
-	spawnto_x86 = random.choice(randomize_settings['spawnto'].keys())
-	spawnto_x64 = randomize_settings['spawnto'][spawnto_x86]
+     spawnto_x86 = random.choice(randomize_settings['spawnto'].keys())
+     spawnto_x64 = randomize_settings['spawnto'][spawnto_x86]
 
-	for line in profilecontent:
-		m = re.findall('%%(alphanumeric|alphanumspecial|alphanumspecialurl|alphaupper|alphalower|alphauppernumber|alphalowernumber|alpha|number|hex|netbios|customchar|useragent|spawnto_x86|spawnto_x64|pipename|pipename_stager|dns_stager_subhost|dns_stager_prepend|word|boolean)\:?(\d*)%%', line)
-		if m:
-			for eachmatch in m:
-				replacetype = eachmatch[0]
-				replacevalue = eachmatch[1]
+     for line in profilecontent:
+          m = re.findall('%%(alphanumeric|alphanumspecial|alphanumspecialurl|alphaupper|alphalower|alphauppernumber|alphalowernumber|alpha|number|hex|netbios|customchar|useragent|spawnto_x86|spawnto_x64|pipename|pipename_stager|dns_stager_subhost|dns_stager_prepend|word|boolean)\:?(\d*)%%', line)
+          if m:
+               for eachmatch in m:
+                    replacetype = eachmatch[0]
+                    replacevalue = eachmatch[1]
 
-				#characters
-				if replacetype in ['alphanumeric','alphanumspecial','alphanumspecialurl','alphaupper','alphalower','alphauppernumber','alphalowernumber','alpha','number','hex','netbios','customchar','word','boolean']:
-					if replacetype == 'customchar' and randomize_settings['customcharset'] == '':
-						print '[!] Error - "customchar" variable called with no customchar file specified:'
-						print '	' + line
-						os._exit(0)
-					if replacevalue == '' or replacevalue == None:
-						line = line.replace('%%' + str(replacetype) + '%%',str(chargen(replacetype,1)),1)
-					else:
-						line = line.replace('%%' + str(replacetype) + ':' + str(replacevalue) + '%%',str(chargen(replacetype,replacevalue)),1)
+                    #characters
+                    if replacetype in ['alphanumeric','alphanumspecial','alphanumspecialurl','alphaupper','alphalower','alphauppernumber','alphalowernumber','alpha','number','hex','netbios','customchar','word','boolean']:
+                         if replacetype == 'customchar' and randomize_settings['customcharset'] == '':
+                              print '[!] Error - "customchar" variable called with no customchar file specified:'
+                              print '   ' + line
+                              os._exit(0)
+                         if replacevalue == '' or replacevalue == None:
+                              line = line.replace('%%' + str(replacetype) + '%%',str(chargen(replacetype,1)),1)
+                         else:
+                              line = line.replace('%%' + str(replacetype) + ':' + str(replacevalue) + '%%',str(chargen(replacetype,replacevalue)),1)
 
-				elif replacetype == 'useragent':
-					line = line.replace('%%useragent%%',random.choice(randomize_settings['useragents']),1)
+                    elif replacetype == 'useragent':
+                         line = line.replace('%%useragent%%',random.choice(randomize_settings['useragents']),1)
 
-				elif replacetype == 'spawnto_x86':
-					line = line.replace('%%spawnto_x86%%',spawnto_x86,1)
-				
-				elif replacetype == 'spawnto_x64':
-					line = line.replace('%%spawnto_x64%%',spawnto_x64,1)
+                    elif replacetype == 'spawnto_x86':
+                         line = line.replace('%%spawnto_x86%%',spawnto_x86,1)
+                    
+                    elif replacetype == 'spawnto_x64':
+                         line = line.replace('%%spawnto_x64%%',spawnto_x64,1)
 
-				elif replacetype == 'pipename':
-					line = line.replace('%%pipename%%',random.choice(randomize_settings['pipename']),1)
+                    elif replacetype == 'pipename':
+                         line = line.replace('%%pipename%%',random.choice(randomize_settings['pipename']),1)
 
-				elif replacetype == 'pipename_stager':
-					line = line.replace('%%pipename_stager%%',random.choice(randomize_settings['pipename_stager']),1)
-				
-				elif replacetype == 'dns_stager_subhost':
-					line = line.replace('%%dns_stager_subhost%%',random.choice(randomize_settings['dns_stager_subhost']),1)
-				
-				elif replacetype == 'dns_stager_prepend':
-					line = line.replace('%%dns_stager_prepend%%',random.choice(randomize_settings['dns_stager_prepend']),1)				
+                    elif replacetype == 'pipename_stager':
+                         line = line.replace('%%pipename_stager%%',random.choice(randomize_settings['pipename_stager']),1)
+                    
+                    elif replacetype == 'dns_stager_subhost':
+                         line = line.replace('%%dns_stager_subhost%%',random.choice(randomize_settings['dns_stager_subhost']),1)
+                    
+                    elif replacetype == 'dns_stager_prepend':
+                         line = line.replace('%%dns_stager_prepend%%',random.choice(randomize_settings['dns_stager_prepend']),1)  
 
-		filewrite(line + '\n',randomize_settings['tempfilename'],'a')
 
-	#c2lint testing
-	if randomize_settings['notest']:
-		os.system('mv ' + randomize_settings['tempfilename'] + ' ' + randomize_settings['tempfilename'].replace('.tmp','',-1))
-		print '[+] Profile written to: ' + randomize_settings['tempfilename'].replace('.tmp','',-1)
-	elif c2lint():
-		os.system('mv ' + randomize_settings['tempfilename'] + ' ' + randomize_settings['tempfilename'].replace('.tmp','',-1))
-		print '[+] Profile written to: ' + randomize_settings['tempfilename'].replace('.tmp','',-1)
+          filewrite(line + '\n',randomize_settings['tempfilename'],'a')
+
+     # Appending SSL Cert at bottom
+     filewrite('https-certificate {' + '\n',randomize_settings['tempfilename'],'a')
+     filewrite('set CN       "Test";' + '\n',randomize_settings['tempfilename'],'a')
+     filewrite('set O        "Test";' + '\n',randomize_settings['tempfilename'],'a')
+     filewrite('set keystore \"{}\";'.format(certificate_store) + '\n',randomize_settings['tempfilename'],'a')
+     filewrite('set password \"{}\";'.format(certificate_store_password)+ '\n',randomize_settings['tempfilename'],'a')
+     filewrite('}' + '\n',randomize_settings['tempfilename'],'a')
+
+
+     #c2lint testing
+     if randomize_settings['notest']:
+          os.system('mv ' + randomize_settings['tempfilename'] + ' ' + randomize_settings['tempfilename'].replace('.tmp','',-1))
+          print '[+] Profile written to: ' + randomize_settings['tempfilename'].replace('.tmp','',-1)
+     elif c2lint():
+          os.system('mv ' + randomize_settings['tempfilename'] + ' ' + randomize_settings['tempfilename'].replace('.tmp','',-1))
+          print '[+] Profile written to: ' + randomize_settings['tempfilename'].replace('.tmp','',-1)
 
 def c2lint():
-	testingoutput = os.popen('cd ' + randomize_settings['cobalt'] + ' && ' + randomize_settings['cobalt'] + 'c2lint ' + randomize_settings['tempfilename']).readlines()
-	fail = False
-	for outputline in testingoutput:
-		if 'Error(s)' in outputline or '[-]' in outputline:
-			fail = True
-		if fail and processdetails['errorcount'] < 4:
-			print '	[-] Error with c2lint check - Attempt ' + str(processdetails['errorcount']) + ' of 3'
-			processdetails['errorcount'] += 1
-			c2lint()
-		elif fail and processdetails['errorcount'] > 3:
-			for _ in testingoutput:
-				print _
-			print '[!] The profile failed c2lint error checking three times. Review the c2lint error report above and modify the profile. Exiting.'
-			os.system('rm ' + randomize_settings['tempfilename'])
-			os._exit(0)
-	processdetails['errorcount'] = 1
-	return True
+     testingoutput = os.popen('cd ' + randomize_settings['cobalt'] + ' && ' + randomize_settings['cobalt'] + 'c2lint ' + randomize_settings['tempfilename']).readlines()
+     fail = False
+     for outputline in testingoutput:
+          if 'Error(s)' in outputline or '[-]' in outputline:
+               fail = True
+          if fail and processdetails['errorcount'] < 4:
+               print '   [-] Error with c2lint check - Attempt ' + str(processdetails['errorcount']) + ' of 3'
+               processdetails['errorcount'] += 1
+               c2lint()
+          elif fail and processdetails['errorcount'] > 3:
+               for _ in testingoutput:
+                    print _
+               print '[!] The profile failed c2lint error checking three times. Review the c2lint error report above and modify the profile. Exiting.'
+               os.system('rm ' + randomize_settings['tempfilename'])
+               os._exit(0)
+     processdetails['errorcount'] = 1
+     return True
 
 def filewrite(texttowrite,filetowriteto,mode):
-	f = open(filetowriteto, mode)
-	f.write(texttowrite)
-	f.close()
+     f = open(filetowriteto, mode)
+     f.write(texttowrite)
+     f.close()
 
 if __name__ == '__main__':
 
-	parser = argparse.ArgumentParser(description='''malleable-c2-randomizer.py''')
-	parser.add_argument('-profile','-p', help='Path to the Malleable C2 template to randomize', required=True)
-	parser.add_argument('-count','-c', help='The number of randomized profiles to create {Default = 1}')
-	parser.add_argument('-cobalt','-d',  help='The directory where Cobalt Strike is located (for c2lint) {Default = current directory}')
-	parser.add_argument('-output','-o', help='Output base name {Default = template basename and random string}')
-	parser.add_argument('-notest','-n', help='Skip testing with c2lint', action='store_true')
+     parser = argparse.ArgumentParser(description='''malleable-c2-randomizer.py''')
+     parser.add_argument('-profile','-p', help='Path to the Malleable C2 template to randomize', required=True)
+     parser.add_argument('-count','-c', help='The number of randomized profiles to create {Default = 1}')
+     parser.add_argument('-cobalt','-d',  help='The directory where Cobalt Strike is located (for c2lint) {Default = current directory}')
+     parser.add_argument('-output','-o', help='Output base name {Default = template basename and random string}')
+     parser.add_argument('-notest','-n', help='Skip testing with c2lint', action='store_true')
+     parser.add_argument('-charset', help='File with a custom characterset to use with the %%customchar%% variable {Default = Built-in list}')
+     parser.add_argument('-wordlist', help='File with a list of custom words to use with the %%word%% variable {Default = Built-in list}')
+     parser.add_argument('-useragent', help='File with a list of useragents {Default = Built-in list}')
+     parser.add_argument('-spawnto', help='File with a list of custom spawnto processes {Default = Built-in list}')
+     parser.add_argument('-pipename', help='File with a list of custom pipename values {Default = Built-in list}')
+     parser.add_argument('-pipename_stager', help='File with a list of custom pipename_stager values {Default = Built-in list}')
+     parser.add_argument('-dns_stager_subhost', help='File with a list of custom dns_stager_subhost values {Default = Built-in list}')
+     parser.add_argument('-dns_stager_prepend', help='File with a list of custom dns_stager_prepend values {Default = Built-in list}')
+     parser.add_argument('-certificate_store', help='Your custom SSL Cert with .store extension. Specify absolute path')
+     parser.add_argument('-certificate_store_password', help='Your custom SSL Cert password')
 
-	parser.add_argument('-charset', help='File with a custom characterset to use with the %%customchar%% variable {Default = Built-in list}')
-	parser.add_argument('-wordlist', help='File with a list of custom words to use with the %%word%% variable {Default = Built-in list}')
-	parser.add_argument('-useragent', help='File with a list of useragents {Default = Built-in list}')
-	parser.add_argument('-spawnto', help='File with a list of custom spawnto processes {Default = Built-in list}')
-	parser.add_argument('-pipename', help='File with a list of custom pipename values {Default = Built-in list}')
-	parser.add_argument('-pipename_stager', help='File with a list of custom pipename_stager values {Default = Built-in list}')
-	parser.add_argument('-dns_stager_subhost', help='File with a list of custom dns_stager_subhost values {Default = Built-in list}')
-	parser.add_argument('-dns_stager_prepend', help='File with a list of custom dns_stager_prepend values {Default = Built-in list}')
-	
-	args = parser.parse_args()
-	
-	if os.path.isfile(args.profile):
-		randomize_settings['profile'] = args.profile
-	else:
-		parser.error('please specify a valid Malleable C2 profile')
+     
+     args = parser.parse_args()
+     
+     if os.path.isfile(args.profile):
+          randomize_settings['profile'] = args.profile
+     else:
+          parser.error('please specify a valid Malleable C2 profile')
 
-	if args.count != None:
-		try:
-			if int(args.count) > 0:
-				randomize_settings['count'] = int(args.count)
-			else:
-				parser.error('count must be a positive number')
-		except:
-			parser.error('count must be a positive number')
+     if args.count != None:
+          try:
+               if int(args.count) > 0:
+                    randomize_settings['count'] = int(args.count)
+               else:
+                    parser.error('count must be a positive number')
+          except:
+               parser.error('count must be a positive number')
 
-	if args.cobalt:
-		if not args.cobalt.endswith('/'):
-			args.cobalt = args.cobalt + '/'
-		if os.path.isdir(args.cobalt) and os.path.isfile(args.cobalt + 'c2lint'):
-			randomize_settings['cobalt'] = args.cobalt
-		else:
-			parser.error('c2lint not present in current working directory or specified Cobalt Strike directory. Provide a valid Cobalt Strike directory or use the "-notest" flag')
-	elif not args.cobalt and not os.path.isfile(randomize_settings['cobalt'] + 'c2lint') and not args.notest:
-		parser.error('c2lint not present in current working directory or specified Cobalt Strike directory. Provide a valid Cobalt Strike directory or use the "-notest" flag')
+     if args.cobalt:
+          if not args.cobalt.endswith('/'):
+               args.cobalt = args.cobalt + '/'
+          if os.path.isdir(args.cobalt) and os.path.isfile(args.cobalt + 'c2lint'):
+               randomize_settings['cobalt'] = args.cobalt
+          else:
+               parser.error('c2lint not present in current working directory or specified Cobalt Strike directory. Provide a valid Cobalt Strike directory or use the "-notest" flag')
+     elif not args.cobalt and not os.path.isfile(randomize_settings['cobalt'] + 'c2lint') and not args.notest:
+          parser.error('c2lint not present in current working directory or specified Cobalt Strike directory. Provide a valid Cobalt Strike directory or use the "-notest" flag')
 
-	if args.output:
-		if os.path.isabs(args.output):
-			randomize_settings['output'] = args.output
-		else:
-			randomize_settings['output'] = randomize_settings['launchdir'] + '/' + args.output
+     if args.output:
+          if os.path.isabs(args.output):
+               randomize_settings['output'] = args.output
+          else:
+               randomize_settings['output'] = randomize_settings['launchdir'] + '/' + args.output
 
-	else:
-		if ntpath.basename(args.profile).endswith('.profile'):
-			randomize_settings['output'] = randomize_settings['launchdir'] + '/' + ntpath.basename(args.profile).replace('.profile','',-1)
-		else:
-			randomize_settings['output'] = randomize_settings['launchdir'] + '/' + ntpath.basename(args.profile)
+     else:
+          if ntpath.basename(args.profile).endswith('.profile'):
+               randomize_settings['output'] = randomize_settings['launchdir'] + '/' + ntpath.basename(args.profile).replace('.profile','',-1)
+          else:
+               randomize_settings['output'] = randomize_settings['launchdir'] + '/' + ntpath.basename(args.profile)
 
-	if args.notest:
-		randomize_settings['notest'] = True
+     if args.notest:
+          randomize_settings['notest'] = True
 
-	if args.charset:
-		if os.path.isfile(args.charset):
-			with open(args.charset) as charsetfile:
-				randomize_settings['customcharset'] = ''.join(set(charsetfile.read().replace('\n','').replace('\r','')))
+     if args.charset:
+          if os.path.isfile(args.charset):
+               with open(args.charset) as charsetfile:
+                    randomize_settings['customcharset'] = ''.join(set(charsetfile.read().replace('\n','').replace('\r','')))
 
-		else:
-			parser.error('the custom charset file specified does not exist')
+          else:
+               parser.error('the custom charset file specified does not exist')
 
-	if args.wordlist:
-		if os.path.isfile(args.wordlist):
-			with open(args.wordlist) as wordlistfile:
-				randomize_settings['wordlist'] = list(set(wordlistfile.read().splitlines()))
-		else:
-			parser.error('the custom wordlist file specified does not exist')
+     if args.wordlist:
+          if os.path.isfile(args.wordlist):
+               with open(args.wordlist) as wordlistfile:
+                    randomize_settings['wordlist'] = list(set(wordlistfile.read().splitlines()))
+          else:
+               parser.error('the custom wordlist file specified does not exist')
 
-	if args.useragent:
-		if os.path.isfile(args.useragent):
-			with open(args.useragent) as useragentfile:
-				randomize_settings['useragents'] = list(set(useragentfile.read().splitlines()))
-		else:
-			parser.error('the custom useragent list file specified does not exist')
+     if args.useragent:
+          if os.path.isfile(args.useragent):
+               with open(args.useragent) as useragentfile:
+                    randomize_settings['useragents'] = list(set(useragentfile.read().splitlines()))
+          else:
+               parser.error('the custom useragent list file specified does not exist')
 
-	if args.spawnto:
-		if os.path.isfile(args.spawnto):
-			randomize_settings['spawnto'] = {}
-			with open(args.spawnto) as spawntofile:
-				lines = spawntofile.read().splitlines()
-				for each in lines:
-					if not each.startswith('#'):
-						randomize_settings['spawnto'][each.split("\t")[0]] = each.split("\t")[1]
-		else:
-			parser.error('the custom spawnto list file specified does not exist')
+     if args.spawnto:
+          if os.path.isfile(args.spawnto):
+               randomize_settings['spawnto'] = {}
+               with open(args.spawnto) as spawntofile:
+                    lines = spawntofile.read().splitlines()
+                    for each in lines:
+                         if not each.startswith('#'):
+                              randomize_settings['spawnto'][each.split("\t")[0]] = each.split("\t")[1]
+          else:
+               parser.error('the custom spawnto list file specified does not exist')
 
-	if args.pipename:
-		if os.path.isfile(args.pipename):
-			with open(args.pipename) as pipenamefile:
-				randomize_settings['pipename'] = list(set(pipenamefile.read().splitlines()))
-		else:
-			parser.error('the custom pipename list file specified does not exist')
+     if args.pipename:
+          if os.path.isfile(args.pipename):
+               with open(args.pipename) as pipenamefile:
+                    randomize_settings['pipename'] = list(set(pipenamefile.read().splitlines()))
+          else:
+               parser.error('the custom pipename list file specified does not exist')
 
-	if args.pipename_stager:
-		if os.path.isfile(args.pipename_stager):
-			with open(args.pipename_stager) as pipenamestagerfile:
-				randomize_settings['pipename_stager'] = list(set(pipenamestagerfile.read().splitlines()))
-		else:
-			parser.error('the custom pipename_stager list file specified does not exist')
+     if args.pipename_stager:
+          if os.path.isfile(args.pipename_stager):
+               with open(args.pipename_stager) as pipenamestagerfile:
+                    randomize_settings['pipename_stager'] = list(set(pipenamestagerfile.read().splitlines()))
+          else:
+               parser.error('the custom pipename_stager list file specified does not exist')
 
-	if args.dns_stager_subhost:
-		if os.path.isfile(args.dns_stager_subhost):
-			with open(args.dns_stager_subhost) as dnsstagerfile:
-				randomize_settings['dns_stager_subhost'] = list(set(dnsstagerfile.read().splitlines()))
-		else:
-			parser.error('the custom dns_stager_subhost list file specified does not exist')
-	
-	if args.dns_stager_prepend:
-		if os.path.isfile(args.dns_stager_prepend):
-			with open(args.dns_stager_prepend) as dnsprependfile:
-				randomize_settings['dns_stager_prepend'] = list(set(dnsprependfile.read().splitlines()))
-		else:
-			parser.error('the custom dns_stager_prepend list file specified does not exist')
+     if args.dns_stager_subhost:
+          if os.path.isfile(args.dns_stager_subhost):
+               with open(args.dns_stager_subhost) as dnsstagerfile:
+                    randomize_settings['dns_stager_subhost'] = list(set(dnsstagerfile.read().splitlines()))
+          else:
+               parser.error('the custom dns_stager_subhost list file specified does not exist')
+     
+     if args.dns_stager_prepend:
+          if os.path.isfile(args.dns_stager_prepend):
+               with open(args.dns_stager_prepend) as dnsprependfile:
+                    randomize_settings['dns_stager_prepend'] = list(set(dnsprependfile.read().splitlines()))
+          else:
+               parser.error('the custom dns_stager_prepend list file specified does not exist')
 
-	for iter in range(int(randomize_settings['count'])):
-		iter += 1
-		print '[*] Generating profile ' + str(iter) + ' of ' + str(randomize_settings['count'])
-		processprofile(randomize_settings['profile'])
-	print '[+] Profile randomization complete!'
+     if args.certificate_store:
+          if args.certificate_store_password:
+               if os.path.isfile(args.certificate_store):
+                    randomize_settings['certificate_store'] = str(args.certificate_store)
+                    randomize_settings['certificate_store_password'] = str(args.certificate_store_password)
+               else:
+                    parser.error('the custom certificate store list file specified does not exist')
+          else:
+               parser.error('please specify password for your SSL (.store) certificate')
+     else:
+          parser.error("For better **OPSEC** please specify your C2 domain's SSL (.store) certificate")
+
+     for iter in range(int(randomize_settings['count'])):
+          iter += 1
+          print '[*] Generating profile ' + str(iter) + ' of ' + str(randomize_settings['count'])
+          processprofile(randomize_settings['profile'],args.certificate_store,args.certificate_store_password)
+     print '[+] Profile randomization complete!'
